@@ -1,40 +1,37 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/modules/prisma';
-import { Prisma, Category } from '@prisma/client';
+import { Inject, Injectable } from '@nestjs/common';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { CategoryGatewayInterface } from './gateways/category-gateway-interface';
+import { Category } from './entities/category.entity';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Injectable()
 export class CategoriesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @Inject('CategoryPrismaRepository')
+    private categoryRepository: CategoryGatewayInterface,
+  ) {}
 
-  async create(createCategory: Prisma.CategoryCreateInput): Promise<Category> {
-    return this.prisma.category.create({
-      data: createCategory,
-    });
+  async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
+    const category = new Category(createCategoryDto.name);
+
+    return this.categoryRepository.create(category);
   }
 
   async findAll() {
-    return this.prisma.category.findMany();
+    return this.categoryRepository.findAll();
   }
 
-  async findOne(findCategory: Prisma.CategoryWhereUniqueInput) {
-    return this.prisma.category.findUnique({
-      where: findCategory,
-    });
+  async findOne(id: number) {
+    return this.categoryRepository.findById(id);
   }
 
-  async update(
-    findCategory: Prisma.CategoryWhereUniqueInput,
-    updateCategory: Prisma.CategoryUpdateInput,
-  ) {
-    return this.prisma.category.update({
-      data: updateCategory,
-      where: findCategory,
-    });
+  async update(id: number, updateCategoryDto: UpdateCategoryDto) {
+    const category = new Category(updateCategoryDto.name, id);
+
+    return this.categoryRepository.updateById(id, category);
   }
 
-  async remove(findCategory: Prisma.CategoryWhereUniqueInput) {
-    return this.prisma.category.delete({
-      where: findCategory,
-    });
+  async remove(id: number) {
+    return this.categoryRepository.deleteById(id);
   }
 }
