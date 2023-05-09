@@ -12,8 +12,14 @@ export class ContactsService {
     });
   }
 
-  async findAll(): Promise<Contact[]> {
-    return this.prisma.contact.findMany();
+  async findAll(categoryId: number | null): Promise<Contact[]> {
+    const filters = categoryId && {
+      where: {
+        categoryId,
+      },
+    };
+
+    return this.prisma.contact.findMany(filters);
   }
 
   async findOne(findContact: Prisma.ContactWhereUniqueInput): Promise<Contact> {
