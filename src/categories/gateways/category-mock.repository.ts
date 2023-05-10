@@ -24,7 +24,7 @@ export class CategoryMockRepository implements CategoryGatewayInterface {
     );
 
     if (!categorySearch) {
-      throw new Error('Categoria não encontrada!');
+      throw new Error('Category not found!');
     }
 
     return categorySearch;
@@ -36,7 +36,7 @@ export class CategoryMockRepository implements CategoryGatewayInterface {
     );
 
     if (categorySearch === -1) {
-      throw new Error('Categoria não encontrada!');
+      throw new Error('Category not found!');
     }
 
     this.categories[categorySearch] = {
@@ -53,7 +53,7 @@ export class CategoryMockRepository implements CategoryGatewayInterface {
     );
 
     if (categorySearch === -1) {
-      throw new Error('Categoria não encontrada!');
+      throw new Error('Category not found!');
     }
 
     const category = this.categories[categorySearch];
