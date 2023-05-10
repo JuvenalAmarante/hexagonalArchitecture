@@ -1,46 +1,50 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/modules/prisma';
-import { Prisma, Contact } from '@prisma/client';
+import { Inject, Injectable } from '@nestjs/common';
+import { ContactGatewayInterface } from './gateways/contact-gateway-interface';
+import { Contact } from './entities/contact.entity';
+import { CreateContactDto } from './dto/create-contact.dto';
+import { UpdateContactDto } from './dto/update-contact.dto';
 
 @Injectable()
 export class ContactsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @Inject('ContactPrismaRepository')
+    private contactRepository: ContactGatewayInterface,
+  ) {}
 
-  async create(createContact: Prisma.ContactCreateInput): Promise<Contact> {
-    return this.prisma.contact.create({
-      data: createContact,
-    });
+  async create(createContact: CreateContactDto): Promise<Contact> {
+    const contact = new Contact(
+      createContact.name,
+      createContact.email,
+      createContact.phone,
+      createContact.categoryId,
+    );
+
+    return this.contactRepository.create(contact);
   }
 
-  async findAll(categoryId: number | null): Promise<Contact[]> {
-    const filters = categoryId && {
-      where: {
-        categoryId,
-      },
-    };
-
-    return this.prisma.contact.findMany(filters);
+  async findAll(categoryId?: number): Promise<Contact[]> {
+    return categoryId
+      ? this.contactRepository.findByCategory(categoryId)
+      : this.contactRepository.findAll();
   }
 
-  async findOne(findContact: Prisma.ContactWhereUniqueInput): Promise<Contact> {
-    return this.prisma.contact.findUnique({
-      where: findContact,
-    });
+  async findOne(id: number): Promise<Contact> {
+    return this.contactRepository.findById(id);
   }
 
-  async update(
-    findContact: Prisma.ContactWhereUniqueInput,
-    updateContact: Prisma.CategoryUpdateInput,
-  ) {
-    return this.prisma.contact.update({
-      data: updateContact,
-      where: findContact,
-    });
+  async update(id: number, updateContact: UpdateContactDto) {
+    const contact = new Contact(
+      updateContact.name,
+      updateContact.email,
+      updateContact.phone,
+      updateContact.categoryId,
+      id,
+    );
+
+    return this.contactRepository.updateById(id, contact);
   }
 
-  async remove(findContact: Prisma.ContactWhereUniqueInput) {
-    return this.prisma.contact.delete({
-      where: findContact,
-    });
+  async remove(id: number) {
+    return this.contactRepository.deleteById(id);
   }
 }
